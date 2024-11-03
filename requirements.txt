@@ -162,5 +162,5 @@ langchain_chroma
 playwright
 beautifulsoup4
 langchain_community
-pysqlite3
+# pysqlite3
 # pip install -r .\requirements.txt
