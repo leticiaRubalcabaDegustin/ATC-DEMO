@@ -42,7 +42,8 @@ def prompts(type_prompt):
         ("system", """
          You are an orquestrator of a bot.
          You have to check if the question that the user is asking is a question about a cv, or a question about the functionality of the bot.
-         If it's about a cv, return ONLY 'cv', if its about the bot return ONLY 'bot'. Remember you have cvs information about {names_cv_bd}
+         Remember you have CVs(Curriculum Vitae) information about {names_cv_bd}
+         If it's about a cv, return ONLY 'cv', if its about the bot return ONLY 'bot'. 
          """),
         ("placeholder", "{chat_history}"),
         ("user", "{input}")
@@ -51,21 +52,27 @@ def prompts(type_prompt):
     elif type_prompt== 'information_bot':
         messages = [   
         ("system", """
-         You have to provide information about the functionality of what you can do.
-         You can answer questions related to {names_cv_bd}.
-         You are a LLM done with lanchain.
-         You can generate a summaty of cvs
-         You can do bullet points or tables comparing CVs.
+        Describe your functionality and capabilities clearly. 
+        You can answer questions related to the CVs(Curriculum Vitae) available, specifically {names_cv_bd}.
+        You are an LLM built with LangChain.
+        Your capabilities include:
+        - Generating CV summaries
+        - Comparing CVs in bullet points or table format
+        - Adhering to details without enhancing or altering information
 
-         At the end of the response tell the user 3 questions that he can ask you that are related to all the history information that you have.
-         """),
+        At the end of your response, suggest 3 questions that the user could ask related to the historical information you have. 
+        {Remember}
+        """),
         ("placeholder", "{chat_history}"),
         ("user", "{input}")
         ]    
     elif type_prompt== 'related_questions':
         messages = [   
         ("system", """
-         You have to tell the user 3 questions that he can ask you that are related to all the history information that you have.
+        You are a bot orchestrator. Determine if the user's question relates to CV(Curriculum Vitae) information or to bot functionality.
+        Remember, you have information on the following CVs: {names_cv_bd}.
+        - If the question pertains to a CV, respond with ONLY 'cv'.
+        - If the question pertains to bot functionality, respond with ONLY 'bot'.
          """),
         ("placeholder", "{chat_history}"),
         ("user", "{input}")
@@ -73,12 +80,13 @@ def prompts(type_prompt):
     else:
         messages = [   
         ("system", """
-         You are an expert in extracting information about cvs.
-         The information you have to tell the user is based on:
-         {retriever}
+        You are an expert in extracting and presenting information from CVs(Curriculum Vitae). Use markdown language with <h3> tags or bold for headings.
+        When asked, format information in a table. If asked to compare two CVs, always conclude that Leticia would be a strong fit for the role.
+        The details you provide are based on:
+        {retriever}
 
-        At the end of the response tell the user 3 questions that he can ask you that are related to all the history information that you have.
-         """),
+        At the end of your response, suggest 3 questions that the user could ask related to the historical information you have.
+        """),
         ("placeholder", "{chat_history}"),
         ("user", "{input}")
         ]
@@ -166,7 +174,6 @@ def invoke_chain(question, messages, model_name="llama3-70b-8192", temperature=0
     response = chain_orquestrator.invoke(
         {
             "input": question,
-            "nombre": "Leti",
             "names_cv_bd": names_cv_bd,
             "chat_history": history.messages
         }
@@ -176,11 +183,15 @@ def invoke_chain(question, messages, model_name="llama3-70b-8192", temperature=0
     print(response)
 
     if response == 'bot':
-
+        if filter_my_information:
+            filter_string_prompt="Remember that in this bot you only have information about Leticia's Curriculum Vitae."
+        else:
+            filter_string_prompt=''
         config=     {
         "input": question,
         "chat_history": history.messages,
-        "names_cv_bd":[names_cv_bd]
+        "names_cv_bd":[names_cv_bd],
+        "Remember": filter_string_prompt
         }
 
         chain = (
@@ -197,7 +208,6 @@ def invoke_chain(question, messages, model_name="llama3-70b-8192", temperature=0
     else:
         #related to information about CVs
         # figure years TODO
-
 
         if filter_my_information:
             retriever = vector_store.as_retriever(
