@@ -5,7 +5,7 @@ import json
 from streamlit_navigation_bar import st_navbar
 import time
 import os
-import aux_functions as af
+import index_functions as af
 from streamlit_pills import pills
 def render_or_update_model_info(model_name):
     """
@@ -55,26 +55,26 @@ if "messages_mi_cv" not in st.session_state:
     st.session_state.prompt = None
     
 with st.sidebar:
-    st.title("Configuración de modelo")
+    st.title("Configure:")
 
     # Select model
     st.session_state.model = st.selectbox(
-        "Elige un modelo:",
+        "Select model:",
         model_options,
         index=0
     )
 
     # Select temperature
-    st.session_state.temperature = st.slider('Selecciona una temperatura:', min_value=0.0, max_value=1.0, step=0.01, format="%.2f")
+    st.session_state.temperature = st.slider('Select temperature:', min_value=0.0, max_value=1.0, step=0.01, format="%.2f")
 
     # Select max tokens
     if st.session_state.max_tokens > max_tokens[st.session_state.model]:
         max_value = max_tokens[st.session_state.model]
 
-    st.session_state.max_tokens = st.number_input('Seleccione un máximo de tokens:', min_value=1, max_value=max_tokens[st.session_state.model], value=max_tokens[st.session_state.model], step=100)
+    st.session_state.max_tokens = st.number_input('Select tokens:', min_value=1, max_value=max_tokens[st.session_state.model], value=max_tokens[st.session_state.model], step=100)
 
     # Reset chat history button
-    if st.button("Vaciar Chat"):
+    if st.button("Clear Chat"):
         reset_chat_history()
     
 # Render or update model information
@@ -89,7 +89,7 @@ for message in st.session_state.messages_mi_cv:
         st.text("")
 
 # Accept user input
-st.session_state.prompt = st.chat_input("¿En qué puedo ayudarte?")
+st.session_state.prompt = st.chat_input("Ask what can I do...")
 
 
 if st.session_state.prompt:
@@ -106,6 +106,7 @@ if st.session_state.prompt:
             model_name=model_options[model_options.index(st.session_state.model)],
             temperature=st.session_state.temperature,
             max_tokens=st.session_state.max_tokens,
+            filter_my_information=True,
         )
         st.write_stream(response)
         if "figure" in lu.invoke_chain.aux.keys() and len(lu.invoke_chain.aux["figure"]) > 0:
