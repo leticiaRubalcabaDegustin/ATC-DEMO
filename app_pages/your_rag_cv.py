@@ -7,6 +7,19 @@ import time
 import os
 import index_functions as af
 from streamlit_pills import pills
+from langchain_chroma import Chroma
+from langchain_community.embeddings.fastembed import FastEmbedEmbeddings
+
+index_path = "index/mi_cv"
+embeddings = FastEmbedEmbeddings()
+
+if os.path.exists(index_path):
+    vector_store = Chroma(
+        collection_name="cvs",
+        embedding_function=embeddings,
+        persist_directory=index_path
+    )
+
 def render_or_update_model_info(model_name):
     """
     Renders or updates the model information on the webpage.
@@ -72,9 +85,21 @@ with st.sidebar:
 
     st.session_state.max_tokens = st.number_input('Select tokens:', min_value=1, max_value=max_tokens[st.session_state.model], value=max_tokens[st.session_state.model], step=100)
 
+    names_cv_bd=set()
+    for metadata in vector_store._collection.get()['metadatas']:
+        if 'cv_name' in metadata.keys():
+            names_cv_bd.add(metadata['cv_name'])
+
     # Reset chat history button
     if st.button("Clear Chat"):
         reset_chat_history()
+
+    st.markdown('CVs stored in the database:')
+    # Display bullet points
+    for name in names_cv_bd:
+        if name!='':
+            st.markdown(f'- {name}')
+
     
 # Render or update model information
 render_or_update_model_info(st.session_state.model)

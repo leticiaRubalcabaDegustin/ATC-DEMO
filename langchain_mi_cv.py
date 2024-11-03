@@ -2,15 +2,12 @@ import json
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_groq import ChatGroq
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_openai import ChatOpenAI
 from langchain_chroma import Chroma
 from langchain_community.embeddings.fastembed import FastEmbedEmbeddings
 from langchain.memory import ChatMessageHistory
 from dotenv import load_dotenv
 import os
 from functools import lru_cache
-from langchain.chains import create_sql_query_chain
-from langchain_community.utilities import SQLDatabase
 from langchain_google_vertexai import ChatVertexAI
 
 from sympy import im
@@ -19,7 +16,6 @@ from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import RunnablePassthrough
 import traceback
 import pandas as pd
-from langchain.retrievers import ParentDocumentRetriever
 
 
 load_dotenv()
@@ -94,6 +90,8 @@ def prompts(type_prompt):
     prompt = ChatPromptTemplate.from_messages(messages=messages)
     return prompt
 
+def format_docs(docs):
+    return "\n\n".join([d.page_content for d in docs])
 
 @lru_cache(maxsize=None)
 def get_model(model_name, temperature, max_tokens):
@@ -233,7 +231,7 @@ def invoke_chain(question, messages, model_name="llama3-70b-8192", temperature=0
         }
                 
         chain = (
-        {"retriever": retriever, "input": RunnablePassthrough(),"names_cv_bd": RunnablePassthrough()}
+        {"retriever": retriever  | format_docs, "input": RunnablePassthrough(),"names_cv_bd": RunnablePassthrough()}
         | prompts('cv_info')
         | llm 
         | StrOutputParser()
