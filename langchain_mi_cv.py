@@ -214,7 +214,7 @@ def invoke_chain(question, messages, model_name="llama3-70b-8192", temperature=0
                 search_type="similarity",
                 search_kwargs={
                     "k": 5,
-                    "filter": {'cv_name':['Leticia', 'Leticia Rubalcaba', 'Letícia Rubalcaba']}
+                    "filter": {'cv_name': 'Leticia Rubalcaba'}
                 }                
             )
         else:            
