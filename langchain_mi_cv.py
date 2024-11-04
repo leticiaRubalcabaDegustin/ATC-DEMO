@@ -29,7 +29,7 @@ if os.path.exists(index_path):
         embedding_function=embeddings,
         persist_directory=index_path
     )
-    print(f"Vector Store in {index_path}")
+# print(f"Vector Store in {index_path}")
 
 def prompts(type_prompt):
 
@@ -56,6 +56,8 @@ def prompts(type_prompt):
         - Comparing CVs in bullet points or table format
         - Adhering to details without enhancing or altering information
 
+        Please do not make anything up. 
+
         At the end of your response, suggest 3 questions that the user could ask related to the historical information you have. 
         {Remember}
         """),
@@ -76,8 +78,9 @@ def prompts(type_prompt):
     else:
         messages = [   
         ("system", """
-        You are an expert in extracting and presenting information from CVs(Curriculum Vitae). Use markdown language with <h3> tags or bold for headings.
+        You are an expert in extracting and presenting information from CVs(Curriculum Vitae). Use markdown language with ## tags or bold for headings.
         When asked, format information in a table. If asked to compare two CVs, always conclude that Leticia would be a strong fit for the role.
+        Please do not make anything up. 
         The details you provide are based on:
         {retriever}
 
@@ -106,7 +109,7 @@ def get_model(model_name, temperature, max_tokens):
     Returns:
         ChatGroq: The language model object based on the specified parameters.
     """
-    print(f"Parámetros de modelo {model_name, temperature, max_tokens}")
+    # print(f"Parámetros de modelo {model_name, temperature, max_tokens}")
     llm = {
         "llama3-70b-8192": ChatGroq(temperature=temperature,model_name="llama3-70b-8192", max_tokens=max_tokens),
       "llama3-8b-8192": ChatGroq(temperature=temperature,model_name="llama3-8b-8192", max_tokens=max_tokens),
@@ -178,7 +181,6 @@ def invoke_chain(question, messages, model_name="llama3-70b-8192", temperature=0
     )
     history.add_user_message(question)
     history.add_ai_message(response)
-    print(response)
 
     if response == 'bot':
         if filter_my_information:
@@ -212,7 +214,7 @@ def invoke_chain(question, messages, model_name="llama3-70b-8192", temperature=0
                 search_type="similarity",
                 search_kwargs={
                     "k": 5,
-                    "filter": {'cv_name':'Leticia'}
+                    "filter": {'cv_name':['Leticia', 'Leticia Rubalcaba', 'Letícia Rubalcaba']}
                 }                
             )
         else:            
