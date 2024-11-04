@@ -98,6 +98,7 @@ def get_cvsName(chunks,model_name='llama3-70b-8192', temperature=0, max_tokens=2
 
 def upload_pdf_index(chunks,cv_name):
     #upload the pdf to the index    
+    cv_name= cv_name.replace('í','i').replace('ó','o').replace('é','e').replace('á','a').replace('ú','u')
     metadata={"cv_name":cv_name, "type_of_documents": 'cv'}
     for chunk in chunks:
         chunk.metadata.update(metadata)
